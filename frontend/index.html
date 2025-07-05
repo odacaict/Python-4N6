@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Forensics - Platformă de Analiză</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-header">
+    <h1 class="app-title">🔬 Python Forensics</h1>
+    <p class="app-subtitle">Platformă avansată de analiză pentru proiecte Python</p>
+</div>
+
+<div class="container">
+    <!-- Panou Principal -->
+    <div class="forensics-panel">
+        <h2 class="panel-title">Analiză Forensics</h2>
+        
+        <div class="control-group">
+            <label class="control-label">Script Principal</label>
+            <div class="file-upload-area">
+                <div id="mainScriptContainer" class="main-script-container">
+                    <p class="placeholder-text">Niciun script principal încărcat</p>
+                </div>
+                <button id="loadMainScript" class="upload-btn primary">📂 Încarcă Script Principal</button>
+                <input type="file" id="mainScriptInput" accept=".py" style="display: none;">
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label class="control-label">Scripturi Secundare</label>
+            <button id="loadScript" class="upload-btn">📄 Adaugă Scripturi</button>
+            <input type="file" id="scriptInput" accept=".py" multiple style="display: none;">
+            <span class="help-text">Selectați până la 100 de fișiere Python</span>
+        </div>
+        
+        <div class="action-buttons">
+            <button id="startAnalysis" class="action-btn analyze">🔍 Analizează</button>
+            <button id="clearBoard" class="action-btn clear">🗑️ Curăță Tot</button>
+            <button id="resetView" class="action-btn reset">🔄 Resetează Vizualizarea</button>
+        </div>
+        
+        <div class="tools-section">
+            <button id="addConnection" class="tool-btn">➕ Adaugă Conexiune</button>
+            <button id="loadDirectoryStructure" class="tool-btn">📁 Încarcă Structură Directoare</button>
+        </div>
+    </div>
+    
+    <!-- Board Vizualizare -->
+    <div class="board" id="board">
+        <canvas id="connectionCanvas"></canvas>
+        <div id="uploadMessage" class="upload-message"></div>
+    </div>
+    
+    <!-- Panou Lateral -->
+    <div class="sidebar">
+        <div class="sidebar-section">
+            <h3 class="section-title">📊 Raport și Export</h3>
+            <div class="report-actions">
+                <button id="exportWorkflow" class="export-btn" title="Exportă analiza sistemului">📤 Exportă Analiza Sistem</button>
+            </div>
+            <label class="raport-label">Raport analiză</label>
+            <div id="raportBox" class="raport-box"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pentru vizualizare și editare -->
+<div id="modal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <input type="text" class="modal-filename" readonly>
+        <pre class="modal-text"></pre>
+    </div>
+</div>
+
+<!-- Modal pentru raport detaliat -->
+<div id="reportModal" class="modal report-modal hidden">
+    <div class="modal-content report-content">
+        <span class="close" id="closeReportModal">&times;</span>
+        <h2 class="report-title">Raport Script</h2>
+        <div class="report-body" id="reportBody"></div>
+    </div>
+</div>
+
+<!-- Modal pentru workflow -->
+<div id="workflowModal" class="modal workflow-modal hidden">
+    <div class="modal-content workflow-content">
+        <span class="close" id="closeWorkflowModal">&times;</span>
+        <h2 class="workflow-title">Analiză Workflow Detaliată</h2>
+        <div class="workflow-body" id="workflowBody">
+            <div class="workflow-loading">Generând analiza workflow...</div>
+        </div>
+        <div class="workflow-actions">
+            <button id="exportWorkflowPDF" class="export-pdf-btn">📄 Exportă ca PDF</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pentru structura de directoare -->
+<div id="directoryModal" class="modal directory-modal hidden">
+    <div class="modal-content directory-content">
+        <span class="close" id="closeDirectoryModal">&times;</span>
+        <h2 class="directory-title">📁 Încărcare Structură Directoare și Fișiere</h2>
+        
+        <div class="directory-tabs">
+            <button class="tab-btn active" data-tab="upload">🔄 Încarcă Fișiere</button>
+            <button class="tab-btn" data-tab="manual">✏️ Introducere Manuală</button>
+        </div>
+        
+        <!-- Tab Upload Fișiere -->
+        <div class="tab-content" id="uploadTab">
+            <div class="upload-section">
+                <div class="drag-drop-zone" id="dragDropZone">
+                    <div class="drag-drop-content">
+                        <div class="drag-drop-icon">📁</div>
+                        <h3>Drag & Drop sau Click pentru Selectare</h3>
+                        <p>Selectează toate fișierele din directorul rădăcină</p>
+                        <p class="drag-note">Suportă: .py, .txt, .md, .json, .yml, .cfg și altele</p>
+                        <input type="file" id="directoryInput" multiple webkitdirectory>
+                        <input type="file" id="filesInput" multiple style="display:none;">
+                        <div class="upload-buttons">
+                            <button id="selectDirectory" class="upload-btn">📂 Selectează Director</button>
+                            <button id="selectFiles" class="upload-btn">📄 Selectează Fișiere</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="upload-progress" id="uploadProgress" style="display:none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Se procesează fișierele...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab Introducere Manuală -->
+        <div class="tab-content hidden" id="manualTab">
+            <div class="manual-section">
+                <h3>📝 Introdu structura de directoare și fișiere</h3>
+                <p>Folosește formatul tree (ex: tree /f pe Windows):</p>
+                <textarea id="manualStructure" class="manual-textarea" placeholder="project-root/
+├── src/
+│   ├── main.py
+│   ├── utils.py
+│   └── config/
+│       └── settings.json
+├── tests/
+│   ├── test_main.py
+│   └── test_utils.py
+├── docs/
+│   └── README.md
+└── requirements.txt"></textarea>
+                <div class="manual-actions">
+                    <button id="parseManualStructure" class="parse-btn">🔄 Procesează Structura</button>
+                    <button id="clearManualStructure" class="clear-btn">🗑️ Șterge Tot</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Preview Structură -->
+        <div class="structure-preview" id="structurePreview" style="display:none;">
+            <h3>👁️ Vizualizare Structură Detectată</h3>
+            <div class="preview-stats" id="previewStats"></div>
+            <div class="preview-tree" id="previewTree"></div>
+        </div>
+        
+        <!-- Acțiuni finale -->
+        <div class="directory-actions">
+            <button id="loadDirectoryStructure" class="load-structure-btn" disabled>✅ Încarcă în Board</button>
+            <button id="cancelDirectoryLoad" class="cancel-structure-btn">❌ Anulează</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/modulDetectie.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

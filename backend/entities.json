@@ -1,0 +1,25 @@
+{
+  "functions": [],
+  "classes": [
+    "Query",
+    "SemanticAnalysis",
+    "SearchResult",
+    "SearchResponse",
+    "GenerateResponse",
+    "OCRRequest",
+    "OCRResponse",
+    "TranscriptionResponse",
+    "ContestationGenerateRequest",
+    "ContestationGenerateResponse",
+    "ContestationStatusResponse",
+    "VoiceTranscriptionRequest",
+    "VoiceTranscriptionResponse",
+    "RetrievalMetadata",
+    "ResponseType",
+    "ValidationResult",
+    "FrontendRequest",
+    "FrontendResponse",
+    "WebSocketMessage",
+    "FileUploadMetadata"
+  ]
+}

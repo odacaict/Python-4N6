@@ -1,0 +1,16 @@
+backup.generare.py
+cautare.py
+contestatie.py
+doc_generator.py
+generare.py
+health.py
+root.py
+ocr.py
+cautare.py
+contestatie.py
+backup.generare.py
+health.py
+doc_generator.py
+generare.py
+root.py
+ocr.py
